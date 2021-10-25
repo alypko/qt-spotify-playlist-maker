@@ -1,0 +1,16 @@
+# ninja log v5
+1	532	6568941879422238	qt-spotify-playlist-maker_autogen/timestamp	20c159d74a566d05
+532	2075	6568941894855389	CMakeFiles/qt-spotify-playlist-maker.dir/qt-spotify-playlist-maker_autogen/mocs_compilation.cpp.obj	47edd6a4f7d29154
+536	2194	6568941896052184	CMakeFiles/qt-spotify-playlist-maker.dir/main.cpp.obj	df8dbeba7b7dfc1
+534	2239	6568941896500893	CMakeFiles/qt-spotify-playlist-maker.dir/mainwindow.cpp.obj	61844c181dd22bfd
+2240	2526	6568941899342525	qt-spotify-playlist-maker.exe	d2dab7b687affb67
+23	141	6568943286818196	qt-spotify-playlist-maker_autogen/timestamp	20c159d74a566d05
+141	1493	6568943300332519	CMakeFiles/qt-spotify-playlist-maker.dir/qt-spotify-playlist-maker_autogen/mocs_compilation.cpp.obj	47edd6a4f7d29154
+1494	1758	6568943302959519	qt-spotify-playlist-maker.exe	d2dab7b687affb67
+9	1560	6568943510916291	CMakeFiles/qt-spotify-playlist-maker.dir/mainwindow.cpp.obj	61844c181dd22bfd
+1561	1793	6568943513219471	qt-spotify-playlist-maker.exe	d2dab7b687affb67
+5	437	6568948825030365	qt-spotify-playlist-maker_autogen/timestamp	20c159d74a566d05
+437	1973	6568948840383089	CMakeFiles/qt-spotify-playlist-maker.dir/qt-spotify-playlist-maker_autogen/mocs_compilation.cpp.obj	47edd6a4f7d29154
+439	2078	6568948841432702	CMakeFiles/qt-spotify-playlist-maker.dir/main.cpp.obj	df8dbeba7b7dfc1
+9	1590	6568949795150256	CMakeFiles/qt-spotify-playlist-maker.dir/mainwindow.cpp.obj	61844c181dd22bfd
+1590	2246	6568949801679782	qt-spotify-playlist-maker.exe	d2dab7b687affb67

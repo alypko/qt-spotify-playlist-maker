@@ -1,0 +1,5 @@
+D:/abde huli/Studia/Projekt cpp/build-qt-spotify-playlist-maker-Desktop_Qt_6_0_1_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
+D:/abde huli/Studia/Projekt cpp/build-qt-spotify-playlist-maker-Desktop_Qt_6_0_1_MinGW_64_bit-Debug/CMakeFiles/qt-spotify-playlist-maker.dir
+D:/abde huli/Studia/Projekt cpp/build-qt-spotify-playlist-maker-Desktop_Qt_6_0_1_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
+D:/abde huli/Studia/Projekt cpp/build-qt-spotify-playlist-maker-Desktop_Qt_6_0_1_MinGW_64_bit-Debug/CMakeFiles/qt-spotify-playlist-maker_autogen_timestamp_deps.dir
+D:/abde huli/Studia/Projekt cpp/build-qt-spotify-playlist-maker-Desktop_Qt_6_0_1_MinGW_64_bit-Debug/CMakeFiles/qt-spotify-playlist-maker_autogen.dir
