@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&spotify, &QOAuth2AuthorizationCodeFlow::granted,
             this, &MainWindow::granted);
+
+    connect(&spotify, &QOAuth2AuthorizationCodeFlow::granted,
+            this, &MainWindow::Get_User_Information);
 }
 
 MainWindow::~MainWindow()
@@ -53,6 +56,8 @@ void MainWindow::granted ()
 
     ui->actionGet_Playlists->setEnabled(true);
     ui->actionGet_User_Information->setEnabled(true);
+    ui->actionCreate_Playlist->setEnabled(true);
+    ui->actionGrant->setEnabled(false);
     isGranted = true;
 }
 
@@ -76,53 +81,12 @@ void MainWindow::on_actionGrant_triggered()
 
 void MainWindow::on_actionGet_User_Information_triggered()
 {
-    ui->teOutput->appendPlainText("Loading User Informations");
-
-    QUrl u ("https://api.spotify.com/v1/me");
-
-    auto reply = spotify.get(u);
-
-    connect(reply, &QNetworkReply::finished, [=]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
-            return;
-        }
-        const auto data = reply->readAll();
-        ui->teOutput->appendPlainText(data);
-
-        const auto document = QJsonDocument::fromJson(data);
-        const auto root = document.object();
-        userName = root.value("id").toString();
-
-        ui->teOutput->appendPlainText("Username: " + userName);
-
-        reply->deleteLater();
-    });
-
+    Get_User_Information();
 }
 
 void MainWindow::on_actionGet_Playlists_triggered()
 {
-    if (userName.length() == 0) return;
-
-    ui->teOutput->appendPlainText("Loading Playlists ...");
-
-    QUrl u ("https://api.spotify.com/v1/users/" + userName + "/playlists");
-
-    auto reply = spotify.get(u);
-
-    connect (reply, &QNetworkReply::finished, [=]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
-            return;
-        }
-
-        const auto data = reply->readAll();
-        ui->teOutput->appendPlainText(data);
-
-        reply->deleteLater();
-    });
-
+    Get_Playlists();
 }
 
 void MainWindow::on_actionCreate_Playlist_triggered()
@@ -156,6 +120,68 @@ void MainWindow::on_actionCreate_Playlist_triggered()
     });
 
 }
+
+void MainWindow::Get_User_Information()
+{
+
+    QUrl u ("https://api.spotify.com/v1/me");
+
+    auto reply = spotify.get(u);
+
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            ui->teOutput->appendPlainText(reply->errorString());
+            return;
+        }
+        ui->teOutput->appendPlainText("User Informations Loaded");
+        QByteArray data = reply->readAll();
+        //ui->teOutput->appendPlainText(data);
+
+        const auto document = QJsonDocument::fromJson(data);
+        const auto root = document.object();
+        userName = root.value("id").toString();
+
+        ui->teOutput->appendPlainText("Username: " + userName);
+
+        reply->deleteLater();
+    });
+}
+
+void MainWindow::Get_Playlists()
+{
+    //QListWidgetItem *itm = ui->listPlaylist->itemDoubleClicked();
+
+
+    if (userName.length() == 0) return;
+
+    ui->teOutput->appendPlainText("Loading Playlists ...");
+
+    QUrl u ("https://api.spotify.com/v1/users/" + userName + "/playlists?offset=0&limit=50");
+
+    auto reply = spotify.get(u);
+
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            ui->teOutput->appendPlainText(reply->errorString());
+            return;
+        }
+
+        const auto data = reply->readAll();
+        const auto document = QJsonDocument::fromJson(data);
+        const auto root = document.object();
+        const auto items = root.value("items").toArray();
+
+        for(int i=0; i<items.size(); i++)
+        {
+            auto *item = new QListWidgetItem(items[i].toObject().value("name").toString());
+            QVariant v;
+            v.setValue(items[i].toObject().value("id").toString());
+            item->setData(Qt::UserRole, v);
+            ui->listPlaylist->addItem(item);
+        }
+        reply->deleteLater();
+    });
+}
 //QJsonValue::toVariant()
 //void MainWindow::setParams()
 //{
@@ -164,7 +190,15 @@ void MainWindow::on_actionCreate_Playlist_triggered()
 //    jObj.insert("public", QJsonValue::fromVariant(false));
 //    jObj.insert("collaborative", QJsonValue::fromVariant(false));
 //    jObj.insert("description", QJsonValue::fromVariant("My first Playlist"));
-
-
 //}
+
+
+void MainWindow::on_listPlaylist_itemDoubleClicked(QListWidgetItem *item)
+{
+
+    ui->listSong->clear();
+    QVariant v = item->data(Qt::UserRole);
+    QString id = v.value<QString>();
+    ui->listSong->addItem(id);
+}
 

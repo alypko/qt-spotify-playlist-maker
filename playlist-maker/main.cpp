@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
 
     qDebug()<<"Suppport"<<QSslSocket::supportsSsl();
-    //  sprawdzenie czy sa biblioteki SSL
+    //  sprawdzenie czy są biblioteki SSL
     if (!QSslSocket::supportsSsl()) {
         qWarning () << "No SSL Support";
         exit (1);

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidgetItem>
 
 #include <QOAuth2AuthorizationCodeFlow>
 
@@ -19,15 +20,23 @@ public:
 
 private slots:
 
-    void granted();
-    void authStatusChanged (QAbstractOAuth::Status status);
+    /* Events */
     void on_actionGrant_triggered();
     void on_actionGet_User_Information_triggered();
     void on_actionGet_Playlists_triggered();
     void on_actionCreate_Playlist_triggered();
+    void on_listPlaylist_itemDoubleClicked(QListWidgetItem *item);
+
+    /* Actions */
+    void granted();
+    void authStatusChanged (QAbstractOAuth::Status status);
+    void Get_User_Information();
+    void Get_Playlists();
+
+
+
 
 private:
-    void setParams();
     Ui::MainWindow *ui;
     QOAuth2AuthorizationCodeFlow spotify;
     bool isGranted;

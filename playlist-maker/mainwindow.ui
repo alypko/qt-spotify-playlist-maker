@@ -20,27 +20,35 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout"/>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="teOutput"/>
-    </item>
-    <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+   <widget class="QSplitter" name="splitter_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>681</width>
+      <height>424</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QPlainTextEdit" name="teOutput">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>141</height>
-       </size>
+     </widget>
+     <widget class="QListWidget" name="listPlaylist">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
-     </spacer>
-    </item>
-   </layout>
+     </widget>
+    </widget>
+    <widget class="QListWidget" name="listSong"/>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -48,7 +56,7 @@
      <x>0</x>
      <y>0</y>
      <width>727</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWeb_API">
@@ -57,9 +65,8 @@
     </property>
     <addaction name="actionGrant"/>
     <addaction name="actionGet_Playlists"/>
-    <addaction name="actionGet_User_Information"/>
-    <addaction name="separator"/>
     <addaction name="actionCreate_Playlist"/>
+    <addaction name="actionGet_User_Information"/>
    </widget>
    <addaction name="menuWeb_API"/>
   </widget>
@@ -89,8 +96,16 @@
    </property>
   </action>
   <action name="actionCreate_Playlist">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Create Playlist</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>счябо</string>
    </property>
   </action>
  </widget>
