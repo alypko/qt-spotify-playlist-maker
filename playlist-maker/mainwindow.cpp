@@ -79,30 +79,23 @@ void MainWindow::on_actionGrant_triggered()
     spotify.grant();
 }
 
-void MainWindow::on_actionGet_User_Information_triggered()
-{
-    Get_User_Information();
-}
-
 void MainWindow::on_actionGet_Playlists_triggered()
 {
     Get_Playlists();
 }
 
-void MainWindow::on_actionCreate_Playlist_triggered()
+void MainWindow::on_createButton_clicked()
 {
     if (userName.length() == 0) return;
 
     ui->teOutput->appendPlainText("Creating Playlist....");
 
     QJsonObject obj;
-    obj["name"] = "Your Coolest Playlist";
+    obj["name"] = ui->linePlaylistName->text();
     obj["public"] = false;
-    obj["description"] = "LOOOOOL";
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
 
-    //ui->teOutput->appendPlainText(jObj);
 
     QUrl u ("https://api.spotify.com/v1/users/" + userName + "/playlists");
 
@@ -113,9 +106,12 @@ void MainWindow::on_actionCreate_Playlist_triggered()
             ui->teOutput->appendPlainText(post->errorString());
             return;
         }
-        const auto data = post->readAll();
-        ui->teOutput->appendPlainText(data);
+        QByteArray data = post->readAll();
+        const auto document = QJsonDocument::fromJson(data);
+        const auto root = document.object();
+        playlistId = root.value("id").toString();
 
+        Get_Recs();
         post->deleteLater();
     });
 
@@ -127,7 +123,7 @@ void MainWindow::Get_User_Information()
     QUrl u ("https://api.spotify.com/v1/me");
 
     auto reply = spotify.get(u);
-
+    ui->teOutput->appendPlainText(reply->readAll());
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
             ui->teOutput->appendPlainText(reply->errorString());
@@ -135,22 +131,20 @@ void MainWindow::Get_User_Information()
         }
         ui->teOutput->appendPlainText("User Informations Loaded");
         QByteArray data = reply->readAll();
-        //ui->teOutput->appendPlainText(data);
-
         const auto document = QJsonDocument::fromJson(data);
         const auto root = document.object();
         userName = root.value("id").toString();
-
-        ui->teOutput->appendPlainText("Username: " + userName);
-
+        ui->teOutput->appendPlainText(data);
         reply->deleteLater();
     });
 }
 
+
+
+
 void MainWindow::Get_Playlists()
 {
-    //QListWidgetItem *itm = ui->listPlaylist->itemDoubleClicked();
-
+    ui->listPlaylist->clear();
 
     if (userName.length() == 0) return;
 
@@ -171,27 +165,81 @@ void MainWindow::Get_Playlists()
         const auto root = document.object();
         const auto items = root.value("items").toArray();
 
-        for(int i=0; i<items.size(); i++)
+        for(const auto &i: items)
         {
-            auto *item = new QListWidgetItem(items[i].toObject().value("name").toString());
+            auto *item = new QListWidgetItem(i.toObject().value("name").toString());
             QVariant v;
-            v.setValue(items[i].toObject().value("id").toString());
+            v.setValue(i.toObject().value("id").toString());
             item->setData(Qt::UserRole, v);
             ui->listPlaylist->addItem(item);
         }
         reply->deleteLater();
     });
 }
-//QJsonValue::toVariant()
-//void MainWindow::setParams()
-//{
-//    QJsonObject jObj;
-//    jObj.insert("name", QJsonValue::fromVariant("My New Playlist"));
-//    jObj.insert("public", QJsonValue::fromVariant(false));
-//    jObj.insert("collaborative", QJsonValue::fromVariant(false));
-//    jObj.insert("description", QJsonValue::fromVariant("My first Playlist"));
-//}
 
+void MainWindow::Get_Recs()
+{
+    ui->teOutput->appendPlainText("get rec playlist id: "+playlistId);
+    QString poolId;
+    bool first = true;
+    for(int i = 0; i < ui->listPool->count(); ++i)
+    {
+        QListWidgetItem* item = ui->listPool->item(i);
+        QVariant v = item->data(Qt::UserRole);
+        QString id = v.value<QString>();
+        if(first)
+            first = false;
+        else
+            poolId += ",";
+        poolId += id;
+    }
+
+    QUrl u ("https://api.spotify.com/v1/recommendations?limit="+ui->spinLimit->text()+"&market=PL&seed_tracks="+poolId);
+    auto reply = spotify.get(u);
+
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            ui->teOutput->appendPlainText(reply->errorString());
+            return;
+        }
+
+        const auto data = reply->readAll();
+        const auto document = QJsonDocument::fromJson(data);
+        const auto root = document.object();
+        const auto tracks = root.value("tracks").toArray();
+
+        QString recSongsUri;
+        bool first = true;
+        for(const auto &i: tracks)
+        {
+            if(first)
+                first = false;
+            else
+                recSongsUri += ',';
+            recSongsUri += i.toObject().value("uri").toString();
+        }
+        Put_Recs(recSongsUri);
+        reply->deleteLater();
+    });
+
+}
+
+void MainWindow::Put_Recs(QString recSongsUri)
+{
+
+    QUrl u ("https://api.spotify.com/v1/playlists/"+playlistId+"/tracks?uris="+recSongsUri);
+    auto post = spotify.post(u);
+
+    connect(post, &QNetworkReply::finished, [=](){
+        if (post->error() != QNetworkReply::NoError) {
+            ui->teOutput->appendPlainText(post->errorString());
+            return;
+        }
+        const auto data = post->readAll();
+        ui->teOutput->appendPlainText(data);
+        post->deleteLater();
+    });
+}
 
 void MainWindow::on_listPlaylist_itemDoubleClicked(QListWidgetItem *item)
 {
@@ -199,6 +247,79 @@ void MainWindow::on_listPlaylist_itemDoubleClicked(QListWidgetItem *item)
     ui->listSong->clear();
     QVariant v = item->data(Qt::UserRole);
     QString id = v.value<QString>();
-    ui->listSong->addItem(id);
+
+    QUrl u ("https://api.spotify.com/v1/playlists/"+id+"/tracks?fields=href%2Citems(track(artists(name)%2Cid%2Cname%2Chref))&limit=50");
+    auto reply = spotify.get(u);
+
+
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            ui->teOutput->appendPlainText(reply->errorString());
+            return;
+        }
+
+        const auto data = reply->readAll();
+        const auto document = QJsonDocument::fromJson(data);
+        const auto root = document.object();
+        const auto items = root.value("items").toArray();
+
+        for(const auto &i: items)
+        {
+            QString artistName;
+            const auto track = i.toObject().value("track").toObject();
+            const auto artists = track.value("artists").toArray();
+            QString songName = track.value("name").toString();
+            if(artists.size()>0)
+            {
+                bool first = true;
+                for(const auto &artist: artists)
+                {
+                    if(first)
+                        first = false;
+                    else
+                        artistName += ", ";
+                    artistName += artist.toObject().value("name").toString();
+                }
+            }
+            else
+                artistName = artists[0].toObject().value("name").toString();
+
+            QString showName = artistName + " - " + songName;
+            auto *item = new QListWidgetItem(showName);
+            QVariant v;
+            v.setValue(track.value("id").toString());
+            item->setData(Qt::UserRole, v);
+            ui->listSong->addItem(item);
+        }
+        reply->deleteLater();
+    });
+
+}
+
+
+void MainWindow::on_addButton_clicked()
+{
+    for(auto &item: ui->listSong->selectedItems())
+    {
+        QList<QListWidgetItem *> list = ui->listPool->findItems(item->text(), Qt::MatchExactly);
+        for(const auto *i: list)
+        {
+            if(i->text() == item->text())
+            {
+                int row = ui->listPool->row(i);
+                ui->listPool->takeItem(row);
+            }
+        }
+        ui->listPool->addItem(item->clone());
+    }
+}
+
+
+
+
+
+void MainWindow::on_showButton_clicked()
+{
+    ui->teOutput->appendPlainText(playlistId);
 }
 
