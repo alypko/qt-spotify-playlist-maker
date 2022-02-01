@@ -26,6 +26,7 @@ private slots:
     void on_listPlaylist_itemDoubleClicked(QListWidgetItem *item);
     void on_addButton_clicked();
     void on_createButton_clicked();
+    void on_deleteButton_clicked();
 
     /* Actions */
     void granted();
@@ -33,16 +34,11 @@ private slots:
     void Get_User_Information();
     void Get_Playlists();
     void Get_Recs();
-    void Put_Recs(QString recSongsUri);
+    void Put_Recs(QByteArray recs);
+    void check_Limit();
 
 
 
-
-
-
-
-
-    void on_showButton_clicked();
 
 private:
     Ui::MainWindow *ui;

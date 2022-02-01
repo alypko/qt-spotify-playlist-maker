@@ -48,21 +48,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="showButton">
-        <property name="text">
-         <string>Show</string>
-        </property>
-       </widget>
-      </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="teOutput">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -78,6 +64,13 @@
         <property name="bottomMargin">
          <number>0</number>
         </property>
+        <item>
+         <widget class="QPushButton" name="deleteButton">
+          <property name="text">
+           <string>Delete Song</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="label">
           <property name="font">
@@ -147,9 +140,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;INFO:&lt;br /&gt;chasing tale of dogma&lt;br /&gt;sad&lt;br /&gt;sad&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;		&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;INFO:&lt;br /&gt;Click Web API-&amp;gt;Grant&lt;br /&gt;Next click Web API-&amp;gt;Get Playlists&lt;br /&gt;&lt;br /&gt;Choose one of your playlists by double clicking on&lt;br /&gt;them&lt;br /&gt;&lt;br /&gt;Choose your favorite songs&lt;br /&gt;&lt;br /&gt;Click &amp;quot;Add to Pool&amp;quot; button to add songs&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(max 5 songs)&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;. You can &lt;br /&gt;also delete songs from pool.&lt;br /&gt;&lt;br /&gt;Enter playlist name and amount of tracks in your&lt;br /&gt;new playlist.&lt;br /&gt;&lt;br /&gt;Click &amp;quot;Create Playlist&amp;quot; button.&lt;br /&gt;&lt;br /&gt;Enjoy :^)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="textFormat">
          <enum>Qt::AutoText</enum>
@@ -181,7 +172,6 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="actionGrant"/>
     <addaction name="actionGet_Playlists"/>
-    <addaction name="actionCreate_Playlist"/>
    </widget>
    <addaction name="menuWeb_API"/>
   </widget>

@@ -52,13 +52,16 @@ MainWindow::~MainWindow()
 void MainWindow::granted ()
 {
     QString token = spotify.token();
-    ui->teOutput->appendPlainText("Token: " + token);
 
     ui->actionGet_Playlists->setEnabled(true);
     ui->actionGet_User_Information->setEnabled(true);
     ui->actionCreate_Playlist->setEnabled(true);
     ui->actionGrant->setEnabled(false);
+    ui->createButton->setEnabled(false);
+    ui->addButton->setEnabled(false);
+    ui->deleteButton->setEnabled(false);
     isGranted = true;
+
 }
 
 void MainWindow::authStatusChanged(QAbstractOAuth::Status status)
@@ -70,8 +73,6 @@ void MainWindow::authStatusChanged(QAbstractOAuth::Status status)
     if (status == QAbstractOAuth::Status::TemporaryCredentialsReceived) {
         s = "temp credentials";
     }
-
-    ui->teOutput->appendPlainText("Auth Status changed: " + s +  "\n");
 }
 
 void MainWindow::on_actionGrant_triggered()
@@ -88,8 +89,6 @@ void MainWindow::on_createButton_clicked()
 {
     if (userName.length() == 0) return;
 
-    ui->teOutput->appendPlainText("Creating Playlist....");
-
     QJsonObject obj;
     obj["name"] = ui->linePlaylistName->text();
     obj["public"] = false;
@@ -103,7 +102,6 @@ void MainWindow::on_createButton_clicked()
 
     connect(post, &QNetworkReply::finished, [=](){
         if (post->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(post->errorString());
             return;
         }
         QByteArray data = post->readAll();
@@ -123,18 +121,14 @@ void MainWindow::Get_User_Information()
     QUrl u ("https://api.spotify.com/v1/me");
 
     auto reply = spotify.get(u);
-    ui->teOutput->appendPlainText(reply->readAll());
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
             return;
         }
-        ui->teOutput->appendPlainText("User Informations Loaded");
         QByteArray data = reply->readAll();
         const auto document = QJsonDocument::fromJson(data);
         const auto root = document.object();
         userName = root.value("id").toString();
-        ui->teOutput->appendPlainText(data);
         reply->deleteLater();
     });
 }
@@ -148,15 +142,13 @@ void MainWindow::Get_Playlists()
 
     if (userName.length() == 0) return;
 
-    ui->teOutput->appendPlainText("Loading Playlists ...");
-
     QUrl u ("https://api.spotify.com/v1/users/" + userName + "/playlists?offset=0&limit=50");
 
     auto reply = spotify.get(u);
 
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
+            //ui->teOutput->appendPlainText(reply->errorString());
             return;
         }
 
@@ -179,7 +171,6 @@ void MainWindow::Get_Playlists()
 
 void MainWindow::Get_Recs()
 {
-    ui->teOutput->appendPlainText("get rec playlist id: "+playlistId);
     QString poolId;
     bool first = true;
     for(int i = 0; i < ui->listPool->count(); ++i)
@@ -199,7 +190,6 @@ void MainWindow::Get_Recs()
 
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
             return;
         }
 
@@ -208,35 +198,33 @@ void MainWindow::Get_Recs()
         const auto root = document.object();
         const auto tracks = root.value("tracks").toArray();
 
-        QString recSongsUri;
-        bool first = true;
+        QJsonObject jsonObj;
+        QJsonArray jsonArray;
+
         for(const auto &i: tracks)
         {
-            if(first)
-                first = false;
-            else
-                recSongsUri += ',';
-            recSongsUri += i.toObject().value("uri").toString();
+            jsonArray.append(i.toObject().value("uri").toString());
         }
-        Put_Recs(recSongsUri);
+        jsonObj["uris"] = jsonArray;
+        QByteArray byteArray;
+        byteArray = QJsonDocument(jsonObj).toJson();
+        Put_Recs(byteArray);
         reply->deleteLater();
     });
 
 }
 
-void MainWindow::Put_Recs(QString recSongsUri)
+void MainWindow::Put_Recs(QByteArray recs)
 {
 
-    QUrl u ("https://api.spotify.com/v1/playlists/"+playlistId+"/tracks?uris="+recSongsUri);
-    auto post = spotify.post(u);
+    QUrl u ("https://api.spotify.com/v1/playlists/"+playlistId+"/tracks");
+    auto post = spotify.post(u,recs);
 
     connect(post, &QNetworkReply::finished, [=](){
         if (post->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(post->errorString());
             return;
         }
         const auto data = post->readAll();
-        ui->teOutput->appendPlainText(data);
         post->deleteLater();
     });
 }
@@ -254,7 +242,6 @@ void MainWindow::on_listPlaylist_itemDoubleClicked(QListWidgetItem *item)
 
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
-            ui->teOutput->appendPlainText(reply->errorString());
             return;
         }
 
@@ -293,9 +280,9 @@ void MainWindow::on_listPlaylist_itemDoubleClicked(QListWidgetItem *item)
         }
         reply->deleteLater();
     });
-
+    check_Limit();
+    ui->addButton->setEnabled(true);
 }
-
 
 void MainWindow::on_addButton_clicked()
 {
@@ -312,14 +299,26 @@ void MainWindow::on_addButton_clicked()
         }
         ui->listPool->addItem(item->clone());
     }
+    check_Limit();
 }
 
-
-
-
-
-void MainWindow::on_showButton_clicked()
+void MainWindow::on_deleteButton_clicked()
 {
-    ui->teOutput->appendPlainText(playlistId);
+    qDeleteAll(ui->listPool->selectedItems());
+    check_Limit();
 }
 
+void MainWindow::check_Limit()
+{
+    if(ui->listPool->count() == 0)
+    {
+        ui->createButton->setEnabled(false);
+        ui->deleteButton->setEnabled(false);
+
+    }
+    else
+    {
+        ui->createButton->setEnabled(true);
+        ui->deleteButton->setEnabled(true);
+    }
+}
